@@ -2,9 +2,12 @@ python: 3.6
 cuda: 9.0
 entrypoint: python sample/runway_model.py
 framework: tensorflow
+spec:
+  gpu: True
+  cpu: False
 files:
   ignore:
     - models/*
 build_steps:
   - pip install runway-python
-  - pip install -r requirements.txt
+  - pip install -r requirements-gpu.txt
