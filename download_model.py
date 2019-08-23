@@ -1,29 +1,26 @@
 import os
-import sys
 import requests
-from tqdm import tqdm
+import argparse
 
-if len(sys.argv) != 2:
-    print('You must enter the model name as a parameter, e.g.: download_model.py 117M')
-    sys.exit(1)
+parser = argparse.ArgumentParser(description='Download a model!')
+parser.add_argument(
+    'model_type',
+    type=str,
+    help='Valid model names: (base|large)',
+)
+model_type = parser.parse_args().model_type
 
-model = sys.argv[1]
+model_dir = os.path.join('models', model_type)
+if not os.path.exists(model_dir):
+    os.makedirs(model_dir)
 
-subdir = os.path.join('models', model)
-if not os.path.exists(subdir):
-    os.makedirs(subdir)
-subdir = subdir.replace('\\','/') # needed for Windows
-
-for filename in ['checkpoint','encoder.json','hparams.json','model.ckpt.data-00000-of-00001', 'model.ckpt.index', 'model.ckpt.meta', 'vocab.bpe']:
-
-    r = requests.get("https://storage.googleapis.com/gpt-2/" + subdir + "/" + filename, stream=True)
-
-    with open(os.path.join(subdir, filename), 'wb') as f:
+for ext in ['data-00000-of-00001', 'index', 'meta']:
+    r = requests.get(f'https://storage.googleapis.com/grover-models/{model_type}/model.ckpt.{ext}', stream=True)
+    with open(os.path.join(model_dir, f'model.ckpt.{ext}'), 'wb') as f:
         file_size = int(r.headers["content-length"])
+        if file_size < 1000:
+            raise ValueError("File doesn't exist? idk")
         chunk_size = 1000
-        with tqdm(ncols=100, desc="Fetching " + filename, total=file_size, unit_scale=True) as pbar:
-            # 1k for chunk_size, since Ethernet packet size is around 1500 bytes
-            for chunk in r.iter_content(chunk_size=chunk_size):
-                f.write(chunk)
-                pbar.update(chunk_size)
-
+        for chunk in r.iter_content(chunk_size=chunk_size):
+            f.write(chunk)
+    print(f"Just downloaded {model_type}/model.ckpt.{ext}!", flush=True)
