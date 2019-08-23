@@ -120,7 +120,7 @@ def setup(opts):
                            do_topk=False)
     saver = tf.train.Saver()
 
-    saver.restore(sess, '.'.join(glob(os.path.join(opts['checkpoint_dir'], '*')[0].split('.')[:-1])))
+    saver.restore(sess, '.'.join(glob(os.path.join(opts['checkpoint_dir'], '*'))[0].split('.')[:-1]))
     return {
         'tokens': tokens,
         'probs': probs,
