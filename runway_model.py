@@ -7,7 +7,6 @@ import sys
 import os
 from glob import glob
 
-sys.path.append('../')
 from lm.modeling import GroverModel, GroverConfig, _top_p_sample, sample
 from sample.encoder import get_encoder, format_context, _tokenize_article_pieces, extract_generated_target
 
