@@ -110,6 +110,9 @@ tf_config = tf.ConfigProto(allow_soft_placement=True)
 
 sess = tf.InteractiveSession(config=tf_config)
 
+def glob_dir(path):
+    return glob(os.path.join(path, '*'))
+
 @runway.setup(options={'checkpoint_dir': runway.file(is_directory=True)})
 def setup(opts):
     initial_context = tf.placeholder(tf.int32, [batch_size_per_chunk, None])
@@ -119,12 +122,13 @@ def setup(opts):
                            eos_token=eos_token, ignore_ids=None, p_for_topp=p_for_topp,
                            do_topk=False)
     saver = tf.train.Saver()
-
-    saver.restore(sess, '.'.join(glob(os.path.join(opts['checkpoint_dir'], '*'))[0].split('.')[:-1]))
+    checkpoint_folder = glob_dir(opts['checkpoint_dir'])[0]
+    checkpoint_path = '.'.join(glob_dir(checkpoint_folder)[0].split('.')[:-1])
+    saver.restore(sess, checkpoint_path)
     return {
         'tokens': tokens,
         'probs': probs,
-        'intiial_context': initial_context,
+        'initial_context': initial_context,
         'eos_token': eos_token,
         'p_for_topp': p_for_topp
     }
@@ -132,7 +136,7 @@ def setup(opts):
     
 @runway.command('generate', inputs={'prompt': runway.text}, outputs={'text': runway.text})
 def generate(model, inputs):
-    text = inputs['text']
+    text = inputs['prompt']
     encoded = _tokenize_article_pieces(encoder, text)
     context_formatted = []
     context_formatted.extend(encoded[:-1])
