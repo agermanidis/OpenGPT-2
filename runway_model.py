@@ -34,16 +34,9 @@ parser.add_argument(
 parser.add_argument(
     '-model_config_fn',
     dest='model_config_fn',
-    default='../lm/configs/mega.json',
+    default='lm/configs/mega.json',
     type=str,
     help='Configuration JSON for the model',
-)
-parser.add_argument(
-    '-model_ckpt',
-    dest='model_ckpt',
-    default='../models/base/model.ckpt',
-    type=str,
-    help='checkpoint file for the model',
 )
 parser.add_argument(
     '-target',
